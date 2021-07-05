@@ -1,16 +1,54 @@
-# This is a sample Python script.
+from PyQt5 import QtWidgets, QtGui, QtCore
+from ToolWrapper import Ui_MainWindow
+import sys
+import win32gui
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+
+        consoleHwnd = win32gui.FindWindow('ConsoleWindowClass', r'C:\Users\NVMTG-C08\Desktop\App_20210609\App_U0622A0.exe')
+        print(consoleHwnd)
+        consoleWindow = QtGui.QWindow.fromWinId(consoleHwnd)
+        consoleWidget = QtWidgets.QWidget.createWindowContainer(consoleWindow)
+
+        toolHwnd = win32gui.FindWindow('WindowClass', None)
+        print(toolHwnd)
+        toolWindow = QtGui.QWindow.fromWinId(toolHwnd)
+        toolWidget = QtWidgets.QWidget.createWindowContainer(toolWindow)
+
+        folderHwnd = win32gui.FindWindow('CabinetWClass', 'App_20210609')
+        print(folderHwnd)
+        folderWindow = QtGui.QWindow.fromWinId(folderHwnd)
+        folderWidget = QtWidgets.QWidget.createWindowContainer(folderWindow)
+
+        toolWidget.setMinimumSize(toolWindow.size())
+        toolWidget.setFixedSize(toolWidget.minimumSize())
+        consoleWidget.setFixedHeight(toolWidget.height())
+        consoleWidget.setFixedWidth(consoleWidget.width())
+
+        hlayout = QtWidgets.QHBoxLayout()
+        hlayout.addWidget(consoleWidget)
+        hlayout.addWidget(toolWidget)
+        upper = QtWidgets.QWidget()
+        upper.setFixedSize(toolWidget.width()+consoleWidget.width(), toolWidget.height())
+        upper.setLayout(hlayout)
+
+        folderWidget.setFixedSize(upper.width(), 600);
+        overall = QtWidgets.QWidget()
+        vlayout = QtWidgets.QVBoxLayout()
+        vlayout.addWidget(upper)
+        vlayout.addWidget(folderWidget)
+        overall.setLayout(vlayout)
+        overall.setFixedSize(upper.width(), upper.height()+folderWidget.height())
+
+        self.ui.scrollAreaWidgetContents.layout().addWidget(overall)
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    app = QtWidgets.QApplication([])
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec_())

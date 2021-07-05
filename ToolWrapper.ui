@@ -16,11 +16,37 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
     <item row="0" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="2,5">
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,4">
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="5,0,0,0,1,1">
         <item>
-         <widget class="QTableWidget" name="ToolList_tableWidget"/>
+         <widget class="QTableWidget" name="ToolList_tableWidget">
+          <column>
+           <property name="text">
+            <string>All</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>ToolName</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>UserName</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>FolderPath</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Footnotes</string>
+           </property>
+          </column>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
@@ -175,7 +201,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>833</width>
+                 <width>936</width>
                  <height>764</height>
                 </rect>
                </property>
