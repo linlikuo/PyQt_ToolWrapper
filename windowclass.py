@@ -2,10 +2,13 @@ import win32gui
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class WindowHandle():
-    def __init__(self, hwnd=None, window=None, widget=None):
+    def __init__(self, hwnd=None, window=None, widget=None, windowclass=None, windowname=None):
         self._hwnd = hwnd
         self._window = window
         self._widget = widget
+        self._windowclass = windowclass
+        self._windowname = windowname
+
 
     @property
     def hwnd(self):
@@ -30,8 +33,29 @@ class WindowHandle():
     def widget(self, new_widget):
         self._widget = new_widget
 
-    def findWindow(self, windowclass, windowname):
-        self._hwnd = win32gui.FindWindow(windowclass, windowname)
+    @property
+    def windoclass(self):
+        return self._windowclass
+
+    @window.setter
+    def windowclass(self, new_windowclass):
+        self._windowclass = new_windowclass
+
+    @property
+    def windowname(self):
+        return self._windowname
+    @window.setter
+    def windowname(self, new_windowname):
+        self._windowname = new_windowname
+
+    def findWindow(self, windowclass=None, windowname=None):
+        wclass = windowclass
+        wname = windowname
+        if not wclass:
+            wclass = self.windowclass
+        if not wname:
+            wname = self.windowname
+        self._hwnd = win32gui.FindWindow(wclass, wname)
         if not self._hwnd:
             return False
         self._window = QtGui.QWindow.fromWinId(self._hwnd)
@@ -40,23 +64,31 @@ class WindowHandle():
 
 
 class ConsoleWindow(WindowHandle):
-    def __init__(self):
-        super(ConsoleWindow, self).__init__()
+    def __init__(self, myhwnd=None, mywindow=None, mywidget=None, mywindowname=None):
+        super(ConsoleWindow, self).__init__(hwnd=myhwnd, window=mywindow, widget=mywidget, windowclass='ConsoleWindowClass', windowname=mywindowname)
 
-    def findWindow(self, windowname):
-        return super(ConsoleWindow, self).findWindow('ConsoleWindowClass', windowname)
+
 
 class ToolWindow(WindowHandle):
-    def __init__(self):
-        super(ToolWindow, self).__init__()
+    def __init__(self, myhwnd=None, mywindow=None, mywidget=None, mywindowname=None):
+        super(ConsoleWindow, self).__init__(hwnd=myhwnd, window=mywindow, widget=mywidget, windowclass='WindowClass', windowname=mywindowname)
 
-    def findWindow(self, windowname):
-        return super(ToolWindow, self).findWindow('WindowClass', windowname)
 
 class FolderWindow(WindowHandle):
+    def __init__(self, myhwnd=None, mywindow=None, mywidget=None, mywindowclass=None, mywindowname=None):
+        super(FolderWindow, self).__init__(hwnd=myhwnd, window=mywindow, widget=mywidget, windowclass='CabinetWClass', windowname=mywindowname)
+
+
+class ToolItem():
+    def __init__(self, ):
+        self.consoleWindow = ConsoleWindow()
+        self.toolWindow = ToolWindow()
+        self.folderWindow = FolderWindow()
+
+
+class WindowManager():
     def __init__(self):
-        super(FolderWindow, self).__init__()
+        pass
 
-    def findWindow(self, windowname):
-        return super(FolderWindow, self).findWindow('CabinetWclass', windowname)
-
+if __name__ == '__main__':
+    pass
