@@ -8,7 +8,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-
+        '''
         consoleHwnd = win32gui.FindWindow('ConsoleWindowClass', r'C:\Users\NVMTG-C08\Desktop\App_20210609\App_U0622A0.exe')
         print(consoleHwnd)
         consoleWindow = QtGui.QWindow.fromWinId(consoleHwnd)
@@ -45,7 +45,7 @@ class MainWindow(QtWidgets.QMainWindow):
         overall.setFixedSize(upper.width(), upper.height()+folderWidget.height())
 
         self.ui.scrollAreaWidgetContents.layout().addWidget(overall)
-
+        '''
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
