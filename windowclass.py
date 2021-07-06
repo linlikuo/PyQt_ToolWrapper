@@ -9,6 +9,10 @@ class WindowHandle():
         self._windowclass = windowclass
         self._windowname = windowname
 
+    def __str__(self):
+        attrs = vars(self)
+        return ', '.join("%s: %s" % item for item in attrs.items())
+
 
     @property
     def hwnd(self):
@@ -53,11 +57,17 @@ class WindowHandle():
         wname = windowname
         if not wclass:
             wclass = self.windowclass
+        else:
+            self.windowclass = wclass
         if not wname:
             wname = self.windowname
+        else:
+            self.windowname = wname
+
         self._hwnd = win32gui.FindWindow(wclass, wname)
         if not self._hwnd:
             return False
+
         self._window = QtGui.QWindow.fromWinId(self._hwnd)
         self._widget = QtWidgets.QWidget.createWindowContainer(self._window)
         return True
@@ -68,27 +78,36 @@ class ConsoleWindow(WindowHandle):
         super(ConsoleWindow, self).__init__(hwnd=myhwnd, window=mywindow, widget=mywidget, windowclass='ConsoleWindowClass', windowname=mywindowname)
 
 
-
 class ToolWindow(WindowHandle):
     def __init__(self, myhwnd=None, mywindow=None, mywidget=None, mywindowname=None):
-        super(ConsoleWindow, self).__init__(hwnd=myhwnd, window=mywindow, widget=mywidget, windowclass='WindowClass', windowname=mywindowname)
+        super(ToolWindow, self).__init__(hwnd=myhwnd, window=mywindow, widget=mywidget, windowclass='WindowClass', windowname=mywindowname)
 
 
 class FolderWindow(WindowHandle):
-    def __init__(self, myhwnd=None, mywindow=None, mywidget=None, mywindowclass=None, mywindowname=None):
+    def __init__(self, myhwnd=None, mywindow=None, mywidget=None, mywindowname=None):
         super(FolderWindow, self).__init__(hwnd=myhwnd, window=mywindow, widget=mywidget, windowclass='CabinetWClass', windowname=mywindowname)
 
-
-class ToolItem():
-    def __init__(self, ):
-        self.consoleWindow = ConsoleWindow()
-        self.toolWindow = ToolWindow()
-        self.folderWindow = FolderWindow()
-
-
-class WindowManager():
+class ToolItem:
     def __init__(self):
-        pass
+        self.console = ConsoleWindow()
+        self.tool = ToolWindow()
+        self.folder = FolderWindow()
+
+    def setUpAllWindow(self, consoleWindowClass=None, consoleWindowName=None, toolWindowClass=None, toolWindowName=None, folderWindowClass=None, folderWindowName=None):
+        self.console.findWindow(consoleWindowClass, consoleWindowName)
+        self.tool.findWindow(toolWindowClass, toolWindowName)
+        self.folder.findWindow(folderWindowClass, folderWindowName)
+        return True
+
+    def __str__(self):
+        temp = 'Item info as below:\n'
+        for name, item in zip(['console', 'tool', 'folder'], [self.console, self.tool, self.folder]):
+            temp += '[{}]:\n'.format(name)
+            temp += item.__str__()
+            temp += '\n'
+        return temp
+
+
 
 if __name__ == '__main__':
     pass
