@@ -9,24 +9,9 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from customizedwidgetclass import ComboBox
 
 class Ui_MainWindow(object):
-    def __init__(self):
-        self.settingPath = 'settings.ini'
-        self.settings = None
-        self.defaultToolFolderPath = None
-        self.nowToolFolderPath = None
-        self.serverIP = None
-        self.serverUsername = None
-        self.serverPassword = None
-        self.serverFwFolderPath = None
-        self.serverToolFolderPath = None
-
-        self.LoadSettings(self.settingPath)
-
-
-
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1231, 872)
@@ -100,13 +85,13 @@ class Ui_MainWindow(object):
         self.UpdateTool_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.UpdateTool_pushButton.setObjectName("UpdateTool_pushButton")
         self.gridLayout_2.addWidget(self.UpdateTool_pushButton, 1, 0, 1, 1)
-        self.UdateFW_pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.UdateFW_pushButton.setObjectName("UdateFW_pushButton")
-        self.gridLayout_2.addWidget(self.UdateFW_pushButton, 1, 1, 1, 1)
-        self.ToolVersion_comboBox = QtWidgets.QComboBox(self.centralwidget)
+        self.UpdateFW_pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.UpdateFW_pushButton.setObjectName("UpdateFW_pushButton")
+        self.gridLayout_2.addWidget(self.UpdateFW_pushButton, 1, 1, 1, 1)
+        self.ToolVersion_comboBox = ComboBox(self.centralwidget)
         self.ToolVersion_comboBox.setObjectName("ToolVersion_comboBox")
         self.gridLayout_2.addWidget(self.ToolVersion_comboBox, 2, 0, 1, 1)
-        self.FwVersion_comboBox = QtWidgets.QComboBox(self.centralwidget)
+        self.FwVersion_comboBox = ComboBox(self.centralwidget)
         self.FwVersion_comboBox.setObjectName("FwVersion_comboBox")
         self.gridLayout_2.addWidget(self.FwVersion_comboBox, 2, 1, 1, 1)
         self.verticalLayout_3.addLayout(self.gridLayout_2)
@@ -193,22 +178,6 @@ class Ui_MainWindow(object):
         self.RefreshToolList_pushButton.setText(_translate("MainWindow", "RefreshToolList"))
         self.RefreshFWList_pushButton.setText(_translate("MainWindow", "RefreshFWList"))
         self.UpdateTool_pushButton.setText(_translate("MainWindow", "UpdateTool"))
-        self.UdateFW_pushButton.setText(_translate("MainWindow", "UpdateFW"))
+        self.UpdateFW_pushButton.setText(_translate("MainWindow", "UpdateFW"))
         self.CustomizedToolPath_checkBox.setText(_translate("MainWindow", "User defined tool path (Below)"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Tab 1"))
-
-    def LoadSettings(self, path, group='Init'):
-        if not path:
-            path = self.settingPath
-
-        self.settings = QtCore.QSettings(path, QtCore.QSettings.IniFormat)
-        self.settings.beginGroup(group)
-        self.defaultToolFolderPath = self.settings.value('DEFAULT_TOOL_FOLDER_PATH')
-        self.nowToolFolderPath = self.defaultToolFolderPath
-        self.serverIP = self.settings.value('SERVER_IP')
-        self.serverUsername = self.settings.value('SERVER_USERNAME')
-        self.serverPassword = self.settings.value('SERVER_PASSWORD')
-        self.serverFwFolderPath = self.settings.value('SERVER_FW_FOLDER_PATH')
-        self.serverToolFolderPath = self.settings.value('SERVER_TOOL_FOLDER_PATH')
-        self.settings.endGroup()
-        return True
