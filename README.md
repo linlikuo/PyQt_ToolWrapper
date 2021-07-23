@@ -1,6 +1,6 @@
 # ToolWrapper
 
-ToolWrapper is a container for testing tool for NVMTG team.
+ToolWrapper is a container of testing tool for NVMTG team.
 
 
 ## Features
