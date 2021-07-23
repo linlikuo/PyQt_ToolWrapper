@@ -23,7 +23,7 @@
          <widget class="QTableWidget" name="ToolList_tableWidget">
           <column>
            <property name="text">
-            <string>All</string>
+            <string>Status</string>
            </property>
           </column>
           <column>
@@ -135,7 +135,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QPushButton" name="UdateFW_pushButton">
+           <widget class="QPushButton" name="UpdateFW_pushButton">
             <property name="text">
              <string>UpdateFW</string>
             </property>
@@ -182,41 +182,14 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>-1</number>
         </property>
-        <widget class="QWidget" name="tab_3">
-         <attribute name="title">
-          <string>Tab 1</string>
-         </attribute>
-         <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="0">
-           <layout class="QVBoxLayout" name="Tab_verticalLayout">
-            <item>
-             <widget class="QScrollArea" name="scrollArea">
-              <property name="widgetResizable">
-               <bool>true</bool>
-              </property>
-              <widget class="QWidget" name="scrollAreaWidgetContents">
-               <property name="geometry">
-                <rect>
-                 <x>0</x>
-                 <y>0</y>
-                 <width>936</width>
-                 <height>764</height>
-                </rect>
-               </property>
-               <layout class="QGridLayout" name="gridLayout_4">
-                <item row="0" column="0">
-                 <layout class="QVBoxLayout" name="scrollContent_verticalLayout"/>
-                </item>
-               </layout>
-              </widget>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
+        <property name="tabsClosable">
+         <bool>true</bool>
+        </property>
+        <property name="movable">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
      </layout>

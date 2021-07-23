@@ -1,4 +1,8 @@
 import sys, os, traceback, types
+import win32api, win32con, win32event, win32process
+from win32com.shell.shell import ShellExecuteEx
+from win32com.shell import shellcon
+from PyQt5 import QtCore
 
 def isUserAdmin():
     if os.name == 'nt':
@@ -19,10 +23,6 @@ def isUserAdmin():
 def runAsAdmin(cmdLine=None, wait=True):
     if os.name != 'nt':
         raise (RuntimeError, 'This function is only implemented on Windows.')
-
-    import win32api, win32con, win32event, win32process
-    from win32com.shell.shell import ShellExecuteEx
-    from win32com.shell import shellcon
 
     python_exe = sys.executable
 
@@ -50,3 +50,20 @@ def runAsAdmin(cmdLine=None, wait=True):
         rc = None
 
     return rc
+
+def runTool(folderpath, new_toolname=''):
+    prev_wd = os.getcwd()
+    os.chdir(folderpath)
+
+    exe_file = ''
+    for file in os.listdir(folderpath):
+        if file.endswith('.exe'):
+            exe_file = os.path.join(folderpath, file)
+            break
+    if exe_file:
+        #runAsAdmin([exe_file, new_toolname], False)
+        #win32api.ShellExecute(0, 'runas', exe_file, new_toolname, '', 1)
+        win32api.ShellExecute(0, 'runas', os.path.join(os.environ['HOMEPATH'], 'Desktop', 'ToolWrapper', 'PsExec.exe'), r'-d -i -h -w {work_dir} {exe} {name}'.format(work_dir=folderpath, exe=exe_file, name=new_toolname), '', 1)
+        win32api.ShellExecute(0, 'open', folderpath, '', '', 1)
+    os.chdir(prev_wd)
+    return exe_file

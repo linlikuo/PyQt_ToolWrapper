@@ -1,56 +1,52 @@
+import win32con
 import win32gui
 from PyQt5 import QtCore, QtGui, QtWidgets
+import time
 
 class WindowHandle():
     def __init__(self, hwnd=None, window=None, widget=None, windowclass=None, windowname=None):
-        self._hwnd = hwnd
-        self._window = window
-        self._widget = widget
-        self._windowclass = windowclass
-        self._windowname = windowname
+        self.hwnd = hwnd
+        self.window = window
+        self.widget = widget
+        self.windowclass = windowclass
+        self.windowname = windowname
+        self.isDone = False
 
     def __str__(self):
         attrs = vars(self)
         return ', '.join("%s: %s" % item for item in attrs.items())
 
 
-    @property
-    def hwnd(self):
-        return self._hwnd
+    def get_hwnd(self):
+        return self.hwnd
 
-    @hwnd.setter
-    def hwnd(self, new_hwnd):
-        self._hwnd = new_hwnd
+    def set_hwnd(self, new_hwnd):
+        self.hwnd = new_hwnd
 
-    @property
-    def window(self):
-        return self._window
+    def get_window(self):
+        return self.window
 
-    @window.setter
-    def window(self, new_window):
-        self._window = new_window
+    def set_window(self, new_window):
+        self.window = new_window
 
-    @property
-    def widget(self):
-        return self._widget
+    def get_widget(self):
+        return self.widget
 
-    def widget(self, new_widget):
-        self._widget = new_widget
+    def set_widget(self, new_widget):
+        self.widget = new_widget
 
-    @property
-    def windoclass(self):
-        return self._windowclass
+    def get_windoclass(self):
+        return self.windowclass
 
-    @window.setter
-    def windowclass(self, new_windowclass):
-        self._windowclass = new_windowclass
+    def set_windowclass(self, new_windowclass):
+        self.windowclass = new_windowclass
 
-    @property
-    def windowname(self):
+    def get_windowname(self):
         return self._windowname
-    @window.setter
-    def windowname(self, new_windowname):
+
+    def set_windowname(self, new_windowname):
         self._windowname = new_windowname
+
 
     def findWindow(self, windowclass=None, windowname=None):
         wclass = windowclass
@@ -64,13 +60,24 @@ class WindowHandle():
         else:
             self.windowname = wname
 
-        self._hwnd = win32gui.FindWindow(wclass, wname)
-        if not self._hwnd:
+        self.hwnd = win32gui.FindWindow(wclass, wname)
+        if not self.hwnd:
+            self.isDone = False
             return False
 
-        self._window = QtGui.QWindow.fromWinId(self._hwnd)
-        self._widget = QtWidgets.QWidget.createWindowContainer(self._window)
+        self.window = QtGui.QWindow.fromWinId(self.hwnd)
+        self.widget = QtWidgets.QWidget.createWindowContainer(self.window)
+
+        self.widget.setFixedSize(self.window.size())
+        self.isDone = True
         return True
+
+    def stop(self):
+        win32gui.SendMessage(self.hwnd, win32con.WM_CLOSE, 0, 0)
+        self.hwnd = None
+        self.window = None
+        self.widget = None
+        self.isDone = False
 
 
 class ConsoleWindow(WindowHandle):
@@ -87,17 +94,115 @@ class FolderWindow(WindowHandle):
     def __init__(self, myhwnd=None, mywindow=None, mywidget=None, mywindowname=None):
         super(FolderWindow, self).__init__(hwnd=myhwnd, window=mywindow, widget=mywidget, windowclass='CabinetWClass', windowname=mywindowname)
 
-class ToolItem:
-    def __init__(self):
-        self.console = ConsoleWindow()
-        self.tool = ToolWindow()
-        self.folder = FolderWindow()
+class ToolItem(QtCore.QThread):
+    def __init__(self, consoleWindowName=None, toolWindowName=None, folderWindowName=None, parent=None, timeout=120):
+        super(ToolItem, self).__init__(parent)
+        self.toolname = toolWindowName
+        self.console = ConsoleWindow(mywindowname=consoleWindowName)
+        self.tool = ToolWindow(mywindowname=toolWindowName)
+        self.folder = FolderWindow(folderWindowName)
+        self.status = False
+        self.parent = parent
+        self.timeout_setup = timeout # 90(s)
+        self._setupTimer = QtCore.QTimer(parent)
+        self._setupTimer.timeout.connect(self.setup)
+        self._timestamp = None
 
-    def setUpAllWindow(self, consoleWindowClass=None, consoleWindowName=None, toolWindowClass=None, toolWindowName=None, folderWindowClass=None, folderWindowName=None):
-        self.console.findWindow(consoleWindowClass, consoleWindowName)
-        self.tool.findWindow(toolWindowClass, toolWindowName)
-        self.folder.findWindow(folderWindowClass, folderWindowName)
+    def setUpAllWindow(self):
+        if not self.folder.isDone:
+            self.folder.findWindow(self.folder.windowclass, self.folder.windowname)
+            return False
+        if not self.tool.isDone:
+            self.tool.findWindow(self.tool.windowclass, self.tool.windowname)
+            return False
+        if not self.console.isDone:
+            self.console.findWindow(self.console.windowclass, self.console.windowname)
+            return False
+
+        self.console.widget.setFixedHeight(self.tool.window.height())
+        self.console.widget.setFixedWidth(self.console.window.width()//2)
+        self.status = True
         return True
+
+    def startSetup(self):
+        self._setupTimer.start(2000)
+
+    def stopSetup(self):
+        self._setupTimer.stop()
+
+    def setup(self):
+        if not self._timestamp:
+            self._timestamp = time.time()
+        if (time.time()-self._timestamp) > self.timeout_setup:
+            print('Finding window timeout.')
+            nowRow = -1
+            for i in range(self.parent.ui.ToolList_tableWidget.rowCount()):
+                if self.parent.ui.ToolList_tableWidget.item(i, self.parent.toollist.findColumnIndex(
+                        'ToolName')).text() == self.toolname:
+                    nowRow = i
+                    break
+            if self.status:
+                print('Finishing finding window.')
+
+                if nowRow != -1:
+                    self.parent.ui.ToolList_tableWidget.item(nowRow,
+                                                             self.parent.toollist.findColumnIndex('Status')).setText(
+                        'Opened')
+            else:
+                print('Failed to find window.')
+                if nowRow != -1:
+                    self.parent.ui.ToolList_tableWidget.item(nowRow,
+                                                             self.parent.toollist.findColumnIndex('Status')).setText(
+                        'Failed to opened')
+            self.stopSetup()
+        else:
+            self.setUpAllWindow()
+            print('Finding window...')
+
+            if self.status:
+                nowRow = -1
+                for i in range(self.parent.ui.ToolList_tableWidget.rowCount()):
+                    if self.parent.ui.ToolList_tableWidget.item(i, self.parent.toollist.findColumnIndex(
+                            'ToolName')).text() == self.toolname:
+                        nowRow = i
+                        break
+                if self.status:
+                    print('Finishing finding window.')
+
+                    if nowRow != -1:
+                        self.parent.ui.ToolList_tableWidget.item(nowRow,
+                                                                 self.parent.toollist.findColumnIndex('Status')).setText(
+                            'Opened')
+                else:
+                    print('Failed to find window.')
+                    if nowRow != -1:
+                        self.parent.ui.ToolList_tableWidget.item(nowRow,
+                                                                 self.parent.toollist.findColumnIndex('Status')).setText(
+                            'Failed to opened')
+                self.stopSetup()
+
+    def run(self):
+        start = time.time()
+        while (not self.setUpAllWindow()) and ((time.time()-start) <= self.timeout_setup):
+            print('Finding window...')
+            #time.sleep(2)
+
+        nowRow = -1
+        for i in range(self.parent.ui.ToolList_tableWidget.rowCount()):
+            if self.parent.ui.ToolList_tableWidget.item(i, self.parent.toollist.findColumnIndex(
+                    'ToolName')).text() == self.toolname:
+                nowRow = i
+                break
+        if self.status:
+            print('Finishing finding window.')
+
+            if nowRow != -1:
+                self.parent.ui.ToolList_tableWidget.item(nowRow, self.parent.toollist.findColumnIndex('Status')).setText('Opened')
+        else:
+            print('Failed to find window.')
+            if nowRow != -1:
+                self.parent.ui.ToolList_tableWidget.item(nowRow, self.parent.toollist.findColumnIndex('Status')).setText('Failed to opened')
+
 
     def __str__(self):
         temp = 'Item info as below:\n'
@@ -106,6 +211,11 @@ class ToolItem:
             temp += item.__str__()
             temp += '\n'
         return temp
+
+    def stop(self):
+        self.tool.stop()
+        self.folder.stop()
+        self.status = False
 
 
 
